@@ -511,7 +511,7 @@ class HCDocs extends HCCommand
     {
         $finder = new Finder();
         $finder->files()->in(base_path() . '/' . $directory);
-
+        $files = [];
         foreach ($finder as $file) {
             if ($file->getExtension() == 'php')
                 $files[] = $file;
@@ -680,7 +680,7 @@ class HCDocs extends HCCommand
         if (count($filterComment) > 1)
             $filterResults = "@" . $filterComment[1];
         $filterParameters = array_filter(explode("@", $filterResults));
-        
+
         $post_data = [
             'method'  => $method->name,
             'comment' => $comment,
