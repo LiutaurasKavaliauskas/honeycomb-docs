@@ -114,10 +114,11 @@ class HCDocs extends HCCommand
         $file = $this->file->get(__DIR__ . '/templates/docs/controllersMenu.hctpl');
         $output = '';
 
-        foreach ($classesInfo['controllers'] as $value) {
-            $field = str_replace('{className}', $value['classInfo']['className'], $file);
-            $output .= $field;
-        }
+        if (isset($classesInfo['controllers']))
+            foreach ($classesInfo['controllers'] as $value) {
+                $field = str_replace('{className}', $value['classInfo']['className'], $file);
+                $output .= $field;
+            }
 
         return $output;
     }
