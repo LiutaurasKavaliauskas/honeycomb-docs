@@ -104,6 +104,7 @@ class HCDocs extends HCCommand
         return $field;
 
     }
+
     /**
      * @param array $classesInfo
      * @return string
@@ -672,10 +673,14 @@ class HCDocs extends HCCommand
     {
         $filterDocComment = str_replace(['     ', '/**', '* ', "*/", "\r\n"], '', $method->getDocComment());
         $filterComment = explode("@", $filterDocComment, 2);
-        $comment = str_replace('*','',$filterComment[0]);
+        $comment = str_replace('*', '', $filterComment[0]);
+        $filterResults = null;
 
-        $filterResults = "@" . $filterComment[1];
+        if (count($filterComment) > 1)
+            $filterResults = "@" . $filterComment[1];
         $filterParameters = array_filter(explode("@", $filterResults));
+
+        echo $filterResults . "\r\n";
 
         $post_data = [
             'method'  => $method->name,
