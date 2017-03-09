@@ -35,11 +35,12 @@ class HCDocs extends HCCommand
         if ('path' == null)
             $this->error('Path mus be given');
 
-        $this->deleteDirectory(public_path('docs'), true);
+        $choice = $this->choice('Do you want to delete old docs?', ['Yes', 'No']);
+
+        if ($choice == 'Yes')
+            $this->deleteDirectory(public_path('docs'), true);
 
         $this->createWebsiteFrame();
-
-        $this->info('Website frame has been created');
 
         foreach ($this->getPhpFiles($this->argument('path')) as $parsedClass) {
             $className = AnnotationsParser::parsePhp(file_get_contents($parsedClass));
@@ -494,7 +495,10 @@ class HCDocs extends HCCommand
         ];
 
         foreach ($fileList as $value)
-            $this->createFileFromTemplate($value);
+            if (!file_exists($value['destination'])) {
+                $this->createFileFromTemplate($value);
+                $this->info('Website frame has been created');
+            }
 
     }
 
