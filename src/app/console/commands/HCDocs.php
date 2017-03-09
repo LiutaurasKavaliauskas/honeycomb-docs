@@ -37,24 +37,9 @@ class HCDocs extends HCCommand
         if ('path' == null)
             $this->error('Path mus be given');
 
-        if (file_exists($this->argument('path') . 'docs')) {
-            $this->info('Deleting existing directory');
-            $it = new RecursiveDirectoryIterator($this->argument('path') . 'docs', RecursiveDirectoryIterator::SKIP_DOTS);
-            $files = new RecursiveIteratorIterator($it,
-                RecursiveIteratorIterator::CHILD_FIRST);
-            foreach ($files as $file) {
-                if ($file->isDir()) {
-                    rmdir($file->getRealPath());
-                } else {
-                    unlink($file->getRealPath());
-                }
-            }
-            rmdir($this->argument('path') . 'docs');
-        }
+        $this->deleteDirectory(public_path('docs'), true);
 
-        $this->createDirectory($this->argument('path') . 'docs');         // creates one
-
-        $this->createWebsiteFrame($this->argument('path'));
+        $this->createWebsiteFrame();
 
         $this->info('Website frame has been created');
 
@@ -326,11 +311,11 @@ class HCDocs extends HCCommand
      */
     public function createDocFile($classesInfo, $codeBlockControllers, $codeBlockSectionControllers)
     {
-        $composer = $this->file->get($this->argument('path') . '/composer.json');
+        $composer = $this->file->get($this->argument('path') . 'composer.json');
 
         if (isset($classesInfo['middleware'])) {
             $this->createFileFromTemplate([
-                "destination"         => $this->argument('path') . 'docs/docs.html',
+                "destination"         =>  base_path('public/docs/' . substr_replace(explode('/', explode(':', explode(',', $composer)[0])[1])[1], '', -1) . '.html'),
                 "templateDestination" => __DIR__ . '/templates/docs/docs.hctpl',
                 "content"             => [
                     "packageName"     => explode(':', explode(',', $composer)[0])[1],
@@ -347,7 +332,7 @@ class HCDocs extends HCCommand
             ]);
         } elseif(isset($classesInfo['commands'])) {
             $this->createFileFromTemplate([
-                "destination"         => $this->argument('path') . 'docs/docs.html',
+                "destination"         =>  base_path('public/docs/' . substr_replace(explode('/', explode(':', explode(',', $composer)[0])[1])[1], '', -1) . '.html'),
                 "templateDestination" => __DIR__ . '/templates/docs/docs.hctpl',
                 "content"             => [
                     "packageName"     => explode(':', explode(',', $composer)[0])[1],
@@ -364,7 +349,7 @@ class HCDocs extends HCCommand
         else
         {
             $this->createFileFromTemplate([
-                "destination"         => $this->argument('path') . 'docs/docs.html',
+                "destination"         =>  base_path('public/docs/' . substr_replace(explode('/', explode(':', explode(',', $composer)[0])[1])[1], '', -1) . '.html'),
                 "templateDestination" => __DIR__ . '/templates/docs/docs.hctpl',
                 "content"             => [
                     "packageName"     => explode(':', explode(',', $composer)[0])[1],
@@ -383,94 +368,96 @@ class HCDocs extends HCCommand
     /**
      * Create website frame
      *
-     * @param $path
+     * @internal param $path
      */
-    public function createWebsiteFrame($path)
+    public function createWebsiteFrame()
     {
+        //$this->createDirectory(public_path('docs'));
+
         $fileList = [
             //assets/css
             [
-                "destination"         => $path . 'docs/assets/css/styles.css',
+                "destination"         => base_path('public/docs/assets/css/styles.css'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/css/styles.hctpl',
             ],
             //assets/js
             [
-                "destination"         => $path . 'docs/assets/js/main.js',
+                "destination"         => base_path('public/docs/assets/js/main.js'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/js/main.hctpl',
             ],
             //assets/less
             [
-                "destination"         => $path . 'docs/assets/less/base.less',
+                "destination"         => base_path('public/docs/assets/less/base.less'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/less/base.hctpl',
             ],
             [
-                "destination"         => $path . 'docs/assets/less/doc.less',
+                "destination"         => base_path('public/docs/assets/less/doc.less'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/less/doc.hctpl',
             ],
             [
-                "destination"         => $path . 'docs/assets/less/landing.less',
+                "destination"         => base_path('public/docs/assets/less/landing.less'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/less/landing.hctpl',
             ],
             [
-                "destination"         => $path . 'docs/assets/less/mixins.less',
+                "destination"         => base_path('public/docs/assets/less/mixins.less'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/less/mixins.hctpl',
             ],
             [
-                "destination"         => $path . 'docs/assets/less/styles.less',
+                "destination"         => base_path('public/docs/assets/less/styles.less'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/less/styles.hctpl',
             ],
             [
-                "destination"         => $path . 'docs/assets/less/theme-default.less',
+                "destination"         => base_path('public/docs/assets/less/theme-default.less'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/less/theme-default.hctpl',
             ],
             //assets/plugins
             [
-                "destination"         => $path . 'docs/assets/plugins/jquery-1.12.3.min.js',
+                "destination"         => base_path('public/docs/assets/plugins/jquery-1.12.3.min.js'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/plugins/jquery-1123-min.hctpl',
             ],
             //assets/plugins/bootstrap/css
             [
-                "destination"         => $path . 'docs/assets/plugins/bootstrap/css/bootstrap.css',
+                "destination"         => base_path('public/docs/assets/plugins/bootstrap/css/bootstrap.css'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/plugins/bootstrap/css/bootstrap.hctpl',
             ],
             [
-                "destination"         => $path . 'docs/assets/plugins/bootstrap/css/bootstrap.min.css',
+                "destination"         => base_path('public/docs/assets/plugins/bootstrap/css/bootstrap.min.css'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/plugins/bootstrap/css/bootstrap-min.hctpl',
             ],
             //assets/plugins/bootstrap/js
             [
-                "destination"         => $path . 'docs/assets/plugins/bootstrap/js/bootstrap.js',
+                "destination"         => base_path('public/docs/assets/plugins/bootstrap/js/bootstrap.js'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/plugins/bootstrap/js/bootstrap.hctpl',
             ],
             [
-                "destination"         => $path . 'docs/assets/plugins/bootstrap/js/bootstrap.min.js',
+                "destination"         => base_path('public/docs/assets/plugins/bootstrap/js/bootstrap.min.js'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/plugins/bootstrap/js/bootstrap-min.hctpl',
             ],
             [
-                "destination"         => $path . 'docs/assets/plugins/bootstrap/js/npm.js',
+                "destination"         => base_path('public/docs/assets/plugins/bootstrap/js/npm.js'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/plugins/bootstrap/js/npm.hctpl',
             ],
             //assets/plugins/prism
             [
-                "destination"         => $path . 'docs/assets/plugins/prism/prism.css',
+                "destination"         => base_path('public/docs/assets/plugins/prism/prism.css'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/plugins/prism/prism-css.hctpl',
             ],
             [
-                "destination"         => $path . 'docs/assets/plugins/prism/prism.js',
+                "destination"         => base_path('public/docs/assets/plugins/prism/prism.js'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/plugins/prism/prism-js.hctpl',
             ],
             //assets/plugins/prism/min
             [
-                "destination"         => $path . 'docs/assets/plugins/prism/min/prism-min.js',
+                "destination"         => base_path('public/docs/assets/plugins/prism/min/prism-min.js'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/plugins/prism/min/prism-min.hctpl',
             ],
             //assets/plugins/jquery-scrollTo
             [
-                "destination"         => $path . 'docs/assets/plugins/jquery-scrollTo/jquery.scrollTo.js',
+                "destination"         => base_path('public/docs/assets/plugins/jquery-scrollTo/jquery.scrollTo.js'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/plugins/jquery-scrollTo/jquery.scrollTo.hctpl',
             ],
             [
-                "destination"         => $path . 'docs/assets/plugins/jquery-scrollTo/jquery.scrollTo.min.js',
+                "destination"         => base_path('public/docs/assets/plugins/jquery-scrollTo/jquery.scrollTo.min.js'),
                 "templateDestination" => __DIR__ . '/templates/docs/assets/plugins/jquery-scrollTo/jquery.scrollTo.min.hctpl',
             ],
 
