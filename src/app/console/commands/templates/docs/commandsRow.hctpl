@@ -1,0 +1,28 @@
+<div id="{className}" class="section-block">
+    <p>
+        <span style="font-size: 16px;">
+            <strong>Package:</strong>
+            </span>{packageName}
+    </p>
+
+    <p><span style="font-size: 16px;"><strong>Class:</strong></span>{className}</p>
+    <p><span style="font-size: 16px;"><strong>Inheritance:</strong></span>{classInheritance}</p>
+    <p>This class has main functions for commands</p>
+
+    <div class="table-responsive">
+		<table class="table" style="width:80%">
+			<thead>
+				<tr>
+					<th>Commands</th>
+					<th style="text-align: right;">Defined By</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><strong>{commandName}</strong></br>{commandDescription}</td>
+					<td style="text-align: right;">{className}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

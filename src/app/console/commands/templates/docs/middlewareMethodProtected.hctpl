@@ -1,0 +1,4 @@
+<tr>
+    <td><strong>private function {methodName}</strong></br>{methodDescription}</td>
+    <td style="text-align: right;">{className}</td>
+</tr>
