@@ -30,8 +30,6 @@ class HCDocs extends HCCommand
      */
     public function handle()
     {
-        $codeBlockControllers = '';
-        $codeBlockSectionControllers = '';
         $classesInfo = null;
 
         if ('path' == null)
@@ -89,7 +87,7 @@ class HCDocs extends HCCommand
             exit();
         }
 
-        $this->createDocFile($classesInfo, $codeBlockControllers, $codeBlockSectionControllers);
+        $this->createDocFile($classesInfo);
     }
 
     public function createControllerMenu(array $classesInfo)
@@ -309,7 +307,7 @@ class HCDocs extends HCCommand
      *
      * @param $classesInfo
      */
-    public function createDocFile($classesInfo, $codeBlockControllers, $codeBlockSectionControllers)
+    public function createDocFile($classesInfo)
     {
         $composer = $this->file->get($this->argument('path') . 'composer.json');
 
@@ -322,8 +320,6 @@ class HCDocs extends HCCommand
                     "name"            => $classesInfo['commands'][0]['classInfo']['name'],
                     "commands"        => $this->createCommandsRow($classesInfo),
                     "commandsMenu"    => $this->createCommandsMenu($classesInfo),
-                    //"controllers" => $codeBlockControllers,
-                    //"sectionControllers" => $codeBlockSectionControllers,
                     "middleware"      => $this->createMiddlewareRow($classesInfo),
                     "middlewareMenu"  => $this->createMiddlewareMenu($classesInfo),
                     "controllers"     => $this->createControllerRow($classesInfo),
@@ -372,8 +368,6 @@ class HCDocs extends HCCommand
      */
     public function createWebsiteFrame()
     {
-        //$this->createDirectory(public_path('docs'));
-
         $fileList = [
             //assets/css
             [
