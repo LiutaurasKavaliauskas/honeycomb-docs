@@ -83,7 +83,7 @@ class HCDocs extends HCCommand
         }
 
         if ($classesInfo == null) {
-            $this->error('There are no controllers or commands!');
+            $this->error('There are no controllers, commands or middleware!');
             exit();
         }
 
