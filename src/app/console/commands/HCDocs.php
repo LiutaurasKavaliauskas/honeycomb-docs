@@ -679,9 +679,7 @@ class HCDocs extends HCCommand
         if (count($filterComment) > 1)
             $filterResults = "@" . $filterComment[1];
         $filterParameters = array_filter(explode("@", $filterResults));
-
-        echo $filterResults . "\r\n";
-
+        
         $post_data = [
             'method'  => $method->name,
             'comment' => $comment,
