@@ -1,11 +1,11 @@
 <?php
 namespace interactivesolutions\honeycombdocs\app\console\commands;
 
+use Go\ParserReflection\ReflectionClass;
+use Go\ParserReflection\ReflectionMethod;
 use interactivesolutions\honeycombcore\commands\HCCommand;
 use Nette\Reflection\AnnotationsParser;
-use RecursiveIteratorIterator;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 
 class HCDocs extends HCCommand
 {
@@ -90,9 +90,26 @@ class HCDocs extends HCCommand
         $this->createDocFile($classesInfo);
     }
 
+    /**
+     * @param $classesInfo
+     * @param $value
+     * @param $file
+     * @return mixed
+     */
+    public function createMethodRow($classesInfo, $value, $file)
+    {
+        $field = str_replace('{methodName}', $value['method'], $file);
+        $field = str_replace('{methodDescription}', $value['comment'], $field);
+        $field = str_replace('{className}', $classesInfo['classInfo']['className'], $field);
+        return $field;
+
+    }
+    /**
+     * @param array $classesInfo
+     * @return string
+     */
     public function createControllerMenu(array $classesInfo)
     {
-        //dd($classesInfo['controllers']);
         $file = $this->file->get(__DIR__ . '/templates/docs/controllersMenu.hctpl');
         $output = '';
 
@@ -104,6 +121,10 @@ class HCDocs extends HCCommand
         return $output;
     }
 
+    /**
+     * @param array $classesInfo
+     * @return string
+     */
     public function createControllerRow(array $classesInfo)
     {
         $file = $this->file->get(__DIR__ . '/templates/docs/controllersRow.hctpl');
@@ -122,61 +143,68 @@ class HCDocs extends HCCommand
 
         }
 
-        //dd($output);
         return $output;
     }
 
+    /**
+     * @param array $classesInfo
+     * @return string
+     */
     public function controllerPublicMethods(array $classesInfo)
     {
         $file = $this->file->get(__DIR__ . '/templates/docs/controllersMethod.hctpl');
         $output = '';
 
-        foreach ($classesInfo['classMethods']['publicMethods'] as $value) {
-            if ($value != null) {
-                $field = str_replace('{methodName}', $value['method'], $file);
-                $field = str_replace('{methodDescription}', $value['comment'], $field);
-                $field = str_replace('{className}', $classesInfo['classInfo']['className'], $field);
-                $output .= $field;
+        if (isset($classesInfo['classMethods']['publicMethods']))
+            foreach ($classesInfo['classMethods']['publicMethods'] as $value) {
+                if ($value != null) {
+                    $output .= $this->createMethodRow($classesInfo, $value, $file);
+                }
             }
-        }
-
         return $output;
     }
 
+    /**
+     * @param array $classesInfo
+     * @return string
+     */
     public function controllerPrivateMethods(array $classesInfo)
     {
         $file = $this->file->get(__DIR__ . '/templates/docs/controllersMethodPrivate.hctpl');
         $output = '';
 
-        foreach ($classesInfo['classMethods']['privateMethods'] as $value) {
-            if ($value != null) {
-                $field = str_replace('{methodName}', $value['method'], $file);
-                $field = str_replace('{methodDescription}', $value['comment'], $field);
-                $field = str_replace('{className}', $classesInfo['classInfo']['className'], $field);
-                $output .= $field;
+        if (isset($classesInfo['classMethods']['privateMethods']))
+            foreach ($classesInfo['classMethods']['privateMethods'] as $value) {
+                if ($value != null) {
+                    $output .= $this->createMethodRow($classesInfo, $value, $file);
+                }
             }
-        }
-
         return $output;
     }
 
+    /**
+     * @param array $classesInfo
+     * @return string
+     */
     public function controllerProtectedMethods(array $classesInfo)
     {
         $file = $this->file->get(__DIR__ . '/templates/docs/controllersMethodProtected.hctpl');
         $output = '';
 
-        foreach ($classesInfo['classMethods']['protectedMethods'] as $value) {
-            if ($value != null) {
-                $field = str_replace('{methodName}', $value['method'], $file);
-                $field = str_replace('{methodDescription}', $value['comment'], $field);
-                $field = str_replace('{className}', $classesInfo['classInfo']['className'], $field);
-                $output .= $field;
+        if (isset($classesInfo['classMethods']['protectedMethods']))
+            foreach ($classesInfo['classMethods']['protectedMethods'] as $value) {
+                if ($value != null) {
+                    $output .= $this->createMethodRow($classesInfo, $value, $file);
+                }
             }
-        }
 
         return $output;
     }
 
+    /**
+     * @param $classesInfo
+     * @return string
+     */
     public function createMiddlewareMenu($classesInfo)
     {
         $file = $this->file->get(__DIR__ . '/templates/docs/middlewareMenu.hctpl');
@@ -190,6 +218,10 @@ class HCDocs extends HCCommand
         return $output;
     }
 
+    /**
+     * @param $classesInfo
+     * @return string
+     */
     public function createMiddlewareRow($classesInfo)
     {
         $file = $this->file->get(__DIR__ . '/templates/docs/middlewareRow.hctpl');
@@ -211,54 +243,59 @@ class HCDocs extends HCCommand
         return $output;
     }
 
+    /**
+     * @param $classesInfo
+     * @return string
+     */
     public function middlewarePublicMethods($classesInfo)
     {
         $file = $this->file->get(__DIR__ . '/templates/docs/middlewareMethod.hctpl');
         $output = '';
 
-        foreach ($classesInfo['classMethods']['publicMethods'] as $value) {
-            if ($value != null) {
-                $field = str_replace('{methodName}', $value['method'], $file);
-                $field = str_replace('{methodDescription}', $value['comment'], $field);
-                $field = str_replace('{className}', $classesInfo['classInfo']['className'], $field);
-                $output .= $field;
+        if (isset($classesInfo['classMethods']['publicMethods']))
+            foreach ($classesInfo['classMethods']['publicMethods'] as $value) {
+                if ($value != null) {
+                    $output .= $this->createMethodRow($classesInfo, $value, $file);
+                }
             }
-        }
 
         return $output;
     }
 
+    /**
+     * @param $classesInfo
+     * @return string
+     */
     public function middlewarePrivateMethods($classesInfo)
     {
         $file = $this->file->get(__DIR__ . '/templates/docs/middlewareMethodPrivate.hctpl');
         $output = '';
 
-        foreach ($classesInfo['classMethods']['privateMethods'] as $value) {
-            if ($value != null) {
-                $field = str_replace('{methodName}', $value['method'], $file);
-                $field = str_replace('{methodDescription}', $value['comment'], $field);
-                $field = str_replace('{className}', $classesInfo['classInfo']['className'], $field);
-                $output .= $field;
+        if (isset($classesInfo['classMethods']['privateMethods']))
+            foreach ($classesInfo['classMethods']['privateMethods'] as $value) {
+                if ($value != null) {
+                    $output .= $this->createMethodRow($classesInfo, $value, $file);
+                }
             }
-        }
-
         return $output;
     }
 
+    /**
+     * @param $classesInfo
+     * @return string
+     */
     public function middlewareProtectedMethods($classesInfo)
     {
+
         $file = $this->file->get(__DIR__ . '/templates/docs/middlewareMethodProtected.hctpl');
         $output = '';
 
-        foreach ($classesInfo['classMethods']['protectedMethods'] as $value) {
-            if ($value != null) {
-                $field = str_replace('{methodName}', $value['method'], $file);
-                $field = str_replace('{methodDescription}', $value['comment'], $field);
-                $field = str_replace('{className}', $classesInfo['classInfo']['className'], $field);
-                $output .= $field;
+        if (isset($classesInfo['classMethods']['protectedMethods']))
+            foreach ($classesInfo['classMethods']['protectedMethods'] as $value) {
+                if ($value != null) {
+                    $output .= $this->createMethodRow($classesInfo, $value, $file);
+                }
             }
-        }
-
         return $output;
     }
 
@@ -274,16 +311,15 @@ class HCDocs extends HCCommand
         $output = '';
 
 
-        if (isset($classesInfo['commands']))
-            foreach ($classesInfo['commands'] as $value) {
-                $field = str_replace('{packageName}', $value['classInfo']['name'], $file);
-                $field = str_replace('{className}', $value['classInfo']['className'], $field);
-                $field = str_replace('{classInheritance}', implode(' &#8594 ', $value['classInheritance']), $field);
-                $field = str_replace('{commandName}', $value['commandsInfo']['signature'], $field);
-                $field = str_replace('{commandDescription}', $value['commandsInfo']['description'], $field);
+        foreach ($classesInfo['commands'] as $value) {
+            $field = str_replace('{packageName}', $value['classInfo']['name'], $file);
+            $field = str_replace('{className}', $value['classInfo']['className'], $field);
+            $field = str_replace('{classInheritance}', implode(' &#8594 ', $value['classInheritance']), $field);
+            $field = str_replace('{commandName}', $value['commandsInfo']['signature'], $field);
+            $field = str_replace('{commandDescription}', $value['commandsInfo']['description'], $field);
 
-                $output .= $field;
-            }
+            $output .= $field;
+        }
 
         return $output;
     }
@@ -293,11 +329,10 @@ class HCDocs extends HCCommand
         $file = $this->file->get(__DIR__ . '/templates/docs/commandsMenu.hctpl');
         $output = '';
 
-        if (isset($classesInfo['commands']))
-            foreach ($classesInfo['commands'] as $value) {
-                $field = str_replace('{className}', $value['classInfo']['className'], $file);
-                $output .= $field;
-            }
+        foreach ($classesInfo['commands'] as $value) {
+            $field = str_replace('{className}', $value['classInfo']['className'], $file);
+            $output .= $field;
+        }
 
         return $output;
     }
@@ -313,7 +348,7 @@ class HCDocs extends HCCommand
 
         if (isset($classesInfo['middleware'])) {
             $this->createFileFromTemplate([
-                "destination"         =>  base_path('public/docs/' . substr_replace(explode('/', explode(':', explode(',', $composer)[0])[1])[1], '', -1) . '.html'),
+                "destination"         => base_path('public/docs/' . substr_replace(explode('/', explode(':', explode(',', $composer)[0])[1])[1], '', -1) . '.html'),
                 "templateDestination" => __DIR__ . '/templates/docs/docs.hctpl',
                 "content"             => [
                     "packageName"     => explode(':', explode(',', $composer)[0])[1],
@@ -326,9 +361,9 @@ class HCDocs extends HCCommand
                     "controllersMenu" => $this->createControllerMenu($classesInfo)
                 ],
             ]);
-        } elseif(isset($classesInfo['commands'])) {
+        } elseif (isset($classesInfo['commands'])) {
             $this->createFileFromTemplate([
-                "destination"         =>  base_path('public/docs/' . substr_replace(explode('/', explode(':', explode(',', $composer)[0])[1])[1], '', -1) . '.html'),
+                "destination"         => base_path('public/docs/' . substr_replace(explode('/', explode(':', explode(',', $composer)[0])[1])[1], '', -1) . '.html'),
                 "templateDestination" => __DIR__ . '/templates/docs/docs.hctpl',
                 "content"             => [
                     "packageName"     => explode(':', explode(',', $composer)[0])[1],
@@ -341,11 +376,9 @@ class HCDocs extends HCCommand
                     "middlewareMenu"  => ''
                 ],
             ]);
-        }
-        else
-        {
+        } else {
             $this->createFileFromTemplate([
-                "destination"         =>  base_path('public/docs/' . substr_replace(explode('/', explode(':', explode(',', $composer)[0])[1])[1], '', -1) . '.html'),
+                "destination"         => base_path('public/docs/' . substr_replace(explode('/', explode(':', explode(',', $composer)[0])[1])[1], '', -1) . '.html'),
                 "templateDestination" => __DIR__ . '/templates/docs/docs.hctpl',
                 "content"             => [
                     "packageName"     => explode(':', explode(',', $composer)[0])[1],
@@ -485,7 +518,7 @@ class HCDocs extends HCCommand
         return $files;
     }
 
-    public function getCommands($parsedClass)
+    public function getCommands(ReflectionClass $parsedClass)
     {
         $commandInfo = [
             'signature'   => $parsedClass->getDefaultProperties()['signature'],
@@ -501,7 +534,7 @@ class HCDocs extends HCCommand
      * @param $parsedClass
      * @return array
      */
-    public function getClassInfo($parsedClass)
+    public function getClassInfo(ReflectionClass $parsedClass)
     {
         if ($parsedClass->name != null) {
             // Class info
@@ -545,7 +578,7 @@ class HCDocs extends HCCommand
      * @param $parsedClass
      * @return array
      */
-    public function getClassInheritance($parsedClass)
+    public function getClassInheritance(ReflectionClass $parsedClass)
     {
         $className = $parsedClass->getShortName();                                                                  // returns class name
 
@@ -567,12 +600,13 @@ class HCDocs extends HCCommand
      * @param $parsedClass
      * @return array
      */
-    public function getClassProperties($parsedClass)
+    public function getClassProperties(ReflectionClass $parsedClass)
     {
         $properties = null;
 
         foreach ($parsedClass->getProperties() as $property) {
-            if ($parsedClass->getName() == $property->class) {                                                       // check only for the required class
+            if ($parsedClass->getName() == $property->class)                                // check only for the required class
+            {
                 if ($property->isPrivate())                                                                         // check whether class is private
                     $type = 'private';
                 elseif ($property->isPublic())                                                                      // check whether class is public
@@ -600,21 +634,31 @@ class HCDocs extends HCCommand
      * @param $parsedClass
      * @return array
      */
-    public function getClassMethods($parsedClass)
+    public function getClassMethods(ReflectionClass $parsedClass)
     {
+        $methods = [];
+
         foreach ($parsedClass->getMethods() as $method) {
-            $method1[] = $this->getPublicMethods($method, $parsedClass);
-            $method2[] = $this->getProtectedMethods($method, $parsedClass);
-            $method3[] = $this->getPrivateMethods($method, $parsedClass);
+            if ($parsedClass->getName() == $method->class) {
+                switch ($method->getModifiers()) {
+                    case ReflectionMethod::IS_PUBLIC:
+
+                        $methods['publicMethods'][] = $this->organizeMethod($method);
+                        break;
+
+                    case ReflectionMethod::IS_PRIVATE:
+
+                        $methods['privateMethods'][] = $this->organizeMethod($method);
+                        break;
+
+                    case ReflectionMethod::IS_PROTECTED:
+
+                        $methods['protectedMethods'][] = $this->organizeMethod($method);
+                        break;
+                }
+            }
+
         }
-
-        $methods = ([
-            'publicMethods'    => array_filter($method1),
-            'protectedMethods' => array_filter($method2),
-            'privateMethods'   => array_filter($method3)
-        ]);
-
-
         return $methods;
     }
 
@@ -622,158 +666,50 @@ class HCDocs extends HCCommand
      * get public methods
      *
      * @param $method
-     * @param $parsedClass
      * @return array
      */
-    function getPublicMethods($method, $parsedClass)
+    private function organizeMethod($method)
     {
+        $filterDocComment = str_replace(['     ', '/**', '* ', "*/", "\r\n"], '', $method->getDocComment());
+        $filterComment = explode("@", $filterDocComment, 2);
+        $comment = str_replace('*','',$filterComment[0]);
 
-        $filterResult = substr(str_replace(['     ', '/** ', '* ', " */", "/\r|\n/"], '',
-            $string = trim(preg_replace('/\s\s+/', ' ',
-                $method->getDocComment()))), 0, 2);
+        $filterResults = "@" . $filterComment[1];
+        $filterParameters = array_filter(explode("@", $filterResults));
 
-        if ($parsedClass->getName() == $method->class && $method->isPublic()) {
-            if ($method->getDocComment() == null) {
-                $comment = null;
-                $params = null;
-                $return = null;
+        $post_data = [
+            'method'  => $method->name,
+            'comment' => $comment,
+            'param'   => [],
+            'throws'  => [],
+            'return'  => []
+        ];
 
-            } elseif ($filterResult == "@r") {
-                $comment = null;
-                $params = null;
-                $return = substr(str_replace(['     ', '/** ', '* ', " */", "/\r|\n/"], '',
-                    $string = trim(preg_replace('/\s\s+/', ' ',
-                        $method->getDocComment()))), 8);
-            } else {
-                $method_data = explode("*", $string = trim(preg_replace('/\s\s+/', ' ', str_replace(['     ', '/**', '* ', "/\r|\n/"], '', $method))), 2);
-                $comment = $method_data[0];
+        foreach ($filterParameters as $values) {
+            $value = explode(' ', trim($values));
 
-                if (strpos($method_data[1], '@return')) {
-                    $rreturn = explode("*/", explode("@return", $method_data[1], 2)[1], 2);
-                    $return = $rreturn[0];
-                } else
-                    $return = null;
+            if (!isset($value[1]))
+                $value[1] = 'null';
 
-                $params = array_filter(explode(',', str_replace(' @param ', ',', explode(" @return ", $method_data[1], 2)[0])));
-                $return = str_replace(' ', '', $return);
+            switch ($value[0]) {
+                case 'param' :
+
+                    $post_data['param'][] = $value[1];
+                    break;
+
+                case 'return' :
+
+                    $post_data['return'][] = $value[1];
+                    break;
+
+                case 'throws' :
+
+                    $post_data['throws'][] = $value[1];
+                    break;
             }
-
-            $post_data = array(
-                'method'  => $method->name,
-                'param'   => $params,
-                'return'  => $return,
-                'comment' => $comment
-            );
-            return $post_data;
         }
 
-    }
-
-    /**
-     * get protected methods
-     *
-     * @param $method
-     * @param $parsedClass
-     * @return array
-     */
-    function getProtectedMethods($method, $parsedClass)
-    {
-
-        $filterResult = substr(str_replace(['     ', '/** ', '* ', " */", "/\r|\n/"], '',
-            $string = trim(preg_replace('/\s\s+/', ' ',
-                $method->getDocComment()))), 0, 2);
-
-        if ($parsedClass->getName() == $method->class && $method->isProtected()) {
-            if ($method->getDocComment() == null) {
-                $comment = null;
-                $params = null;
-                $return = null;
-
-            } elseif ($filterResult == "@r") {
-                $comment = null;
-                $params = null;
-                $return = substr(str_replace(['     ', '/** ', '* ', " */", "/\r|\n/"], '',
-                    $string = trim(preg_replace('/\s\s+/', ' ',
-                        $method->getDocComment()))), 8);
-            } else {
-                $method_data = explode("*", $string = trim(preg_replace('/\s\s+/', ' ', str_replace(['     ', '/**', '* ', "/\r|\n/"], '', $method))), 2);
-
-                $comment = $method_data[0];
-
-
-                if (strpos($method_data[1], '@return')) {
-                    $rreturn = explode("*/", explode("@return", $method_data[1], 2)[1], 2);
-                    $return = $rreturn[0];
-                } else
-                    $return = null;
-
-                $params = array_filter(explode(',', str_replace(' @param ', ',', explode(" @return ", $method_data[1], 2)[0])));
-                $return = str_replace(' ', '', $return);
-
-            }
-            $post_data = array(
-                'method'  => $method->name,
-                'param'   => $params,
-                'return'  => $return,
-                'comment' => $comment
-            );
-
-            return $post_data;
-        }
-
-    }
-
-    /**
-     * get private methods
-     *
-     * @param $method
-     * @param $parsedClass
-     * @return array
-     */
-    function getPrivateMethods($method, $parsedClass)
-    {
-
-        $filterResult = substr(str_replace(['     ', '/** ', '* ', " */", "/\r|\n/"], '',
-            $string = trim(preg_replace('/\s\s+/', ' ',
-                $method->getDocComment()))), 0, 2);
-
-        if ($parsedClass->getName() == $method->class && $method->isPrivate()) {
-            if ($method->getDocComment() == null) {
-                $comment = null;
-                $params = null;
-                $return = null;
-
-            } elseif ($filterResult == "@r") {
-                $comment = null;
-                $params = null;
-                $return = substr(str_replace(['     ', '/** ', '* ', " */", "/\r|\n/"], '',
-                    $string = trim(preg_replace('/\s\s+/', ' ',
-                        $method->getDocComment()))), 8);
-            } else {
-                $method_data = explode("*", $string = trim(preg_replace('/\s\s+/', ' ', str_replace(['     ', '/**', '* ', "/\r|\n/"], '', $method))), 2);
-                $comment = $method_data[0];
-
-
-                if (strpos($method_data[1], '@return')) {
-                    $rreturn = explode("*/", explode("@return", $method_data[1], 2)[1], 2);
-                    $return = $rreturn[0];
-                } else
-                    $return = null;
-
-                $params = array_filter(explode(',', str_replace(' @param ', ',', explode(" @return ", $method_data[1], 2)[0])));
-                $return = str_replace(' ', '', $return);
-
-            }
-            $post_data = array(
-                'method'  => $method->name,
-                'param'   => $params,
-                'return'  => $return,
-                'comment' => $comment
-            );
-
-            return $post_data;
-        }
-
+        return $post_data;
     }
 
 }
