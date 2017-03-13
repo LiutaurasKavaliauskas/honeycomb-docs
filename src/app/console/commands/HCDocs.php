@@ -5,7 +5,6 @@ use Go\ParserReflection\ReflectionClass;
 use Go\ParserReflection\ReflectionMethod;
 use interactivesolutions\honeycombcore\commands\HCCommand;
 use Nette\Reflection\AnnotationsParser;
-use phpDocumentor\Reflection\File;
 use Symfony\Component\Finder\Finder;
 
 class HCDocs extends HCCommand
@@ -114,43 +113,9 @@ class HCDocs extends HCCommand
             $this->createDocFile($classesInfo, $path);
             $this->createIndexFile();
         }
-<<<<<<< HEAD
         else
             $this->error('There are no controllers, commands or middleware for package - ' . $path);
-=======
-
-        $this->createDocFile($classesInfo);
-        $this->createIndexFile();
->>>>>>> origin/master
     }
-
-    public function createIndexFile()
-    {
-        $dir = base_path() . "/public/docs/";
-        $files = scandir($dir);
-        $template = $this->file->get(__DIR__ . '/templates/docs/packageBlock.hctpl');
-        $output = '';
-
-        foreach ($files as $file)
-            if (substr($file, -5) == ".html" && $file != "index.html")
-            {
-                $fileName = (explode('-',$file));
-                unset($fileName[0]);
-                $fileName = substr(implode(' ', $fileName),0 , -5);
-                $field = str_replace('{packageName}', ucfirst($fileName), $template);
-                $field = str_replace('{file}', $file, $field);
-                $output .= $field;
-            }
-
-        $this->createFileFromTemplate([
-            "destination"         => base_path('public/docs/index.html'),
-            "templateDestination" => __DIR__ . '/templates/docs/index.hctpl',
-            "content"             => [
-                "packageBlock" => $output
-            ],
-        ]);
-    }
-
 
     /**
      * @param $classesInfo
@@ -388,10 +353,6 @@ class HCDocs extends HCCommand
         return $output;
     }
 
-    /**
-     * @param $classesInfo
-     * @return string
-     */
     public function createCommandsMenu($classesInfo)
     {
         $file = $this->file->get(__DIR__ . '/templates/docs/commandsMenu.hctpl');
