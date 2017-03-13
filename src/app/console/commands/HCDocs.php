@@ -26,23 +26,49 @@ class HCDocs extends HCCommand
     /**
      * Execute the console command.
      *
-     * @return class info
+     * @return class $info
      */
     public function handle()
     {
+        if (!file_exists(public_path('docs')))
+            $this->createWebsiteFrame();
+        else {
+            $purge = $this->ask('Do you want to delete old docs?', 'y/n');
+
+            if ($purge == 'y' || $purge == 'yes') {
+                $this->deleteDirectory(public_path('docs'), true);
+                $this->createWebsiteFrame();
+            }
+        }
+
+        if (!$this->argument('path')) {
+            if (app()->environment() == 'local') {
+
+                $files = $this->getConfigFiles();
+
+                // removing project config
+                array_pop($files);
+
+                foreach ($files as $file)
+                    if (strpos($file, '/vendor/') === false)
+                        $this->generatePackageDocs(realpath(implode('/', array_slice(explode('/', $file), 0, -4))) . '/');
+            }
+        } else
+            $this->generatePackageDocs($this->argument('path'));
+    }
+
+    /**
+     * Generating single pacakge docs
+     *
+     * @param $path - path to package origin
+     */
+    private function generatePackageDocs($path)
+    {
+        $this->comment($path);
+
         $classesInfo = null;
 
-        if ('path' == null)
-            $this->error('Path mus be given');
-
-        $choice = $this->choice('Do you want to delete old docs?', ['Yes', 'No']);
-
-        if ($choice == 'Yes')
-            $this->deleteDirectory(public_path('docs'), true);
-
-        $this->createWebsiteFrame();
-
-        foreach ($this->getPhpFiles($this->argument('path')) as $parsedClass) {
+        foreach ($this->getPhpFiles($path) as $parsedClass) {
             $className = AnnotationsParser::parsePhp(file_get_contents($parsedClass));
 
             if (sizeof($className) == 0)
@@ -83,12 +109,12 @@ class HCDocs extends HCCommand
             }
         }
 
-        if ($classesInfo == null) {
-            $this->error('There are no controllers, commands or middleware!');
-            exit();
+        if ($classesInfo) {
+            $this->createDocFile($classesInfo, $path);
+            $this->createIndexFile();
         }
-
-        $this->createDocFile($classesInfo);
+        else
+            $this->error('There are no controllers, commands or middleware for package - ' . $path);
     }
 
     /**
@@ -344,10 +370,11 @@ class HCDocs extends HCCommand
      * Create doc file
      *
      * @param $classesInfo
+     * @param $path
      */
-    public function createDocFile($classesInfo)
+    public function createDocFile($classesInfo, $path)
     {
-        $composer = $this->file->get($this->argument('path') . 'composer.json');
+        $composer = $this->file->get($path . 'composer.json');
 
         if (isset($classesInfo['middleware'])) {
             $this->createFileFromTemplate([
@@ -395,6 +422,39 @@ class HCDocs extends HCCommand
                 ],
             ]);
         }
+    }
+
+    /**
+     * @return string
+     * @internal param $classesInfo
+     */
+    public function createPackageRow()
+    {
+
+        $files = $this->getHtmlFiles(base_path('public/docs/'));
+
+        $file = $this->file->get(__DIR__ . '/templates/docs/packageRow.hctpl');
+        $output = '';
+
+        foreach ($files as $value) {
+            $field = str_replace('{packageName}', strtoupper(substr($value->getFilename(), 0, -5)), $file);
+            $field = str_replace('{link}', $value->getFilename(), $field);
+
+            $output .= $field;
+        }
+
+        return $output;
+    }
+
+    public function createIndexFile()
+    {
+        $this->createFileFromTemplate([
+            "destination"         => base_path('public/docs/index.html'),
+            "templateDestination" => __DIR__ . '/templates/docs/index.hctpl',
+            "content"             => [
+                "packages" => $this->createPackageRow(),
+            ],
+        ]);
     }
 
     /**
@@ -495,10 +555,8 @@ class HCDocs extends HCCommand
         ];
 
         foreach ($fileList as $value)
-            if (!file_exists($value['destination'])) {
+            if (!file_exists($value['destination']))
                 $this->createFileFromTemplate($value);
-                $this->info('Website frame has been created');
-            }
 
     }
 
@@ -514,10 +572,23 @@ class HCDocs extends HCCommand
     public function getPhpFiles($directory)
     {
         $finder = new Finder();
-        $finder->files()->in(base_path() . '/' . $directory);
+        $finder->files()->in($directory);
         $files = [];
         foreach ($finder as $file) {
             if ($file->getExtension() == 'php')
+                $files[] = $file;
+        }
+
+        return $files;
+    }
+
+    public function getHtmlFiles($directory)
+    {
+        $finder = new Finder();
+        $finder->files()->in($directory);
+        $files = [];
+        foreach ($finder as $file) {
+            if ($file->getExtension() == 'html' && $file->getFilename() != 'index.html')
                 $files[] = $file;
         }
 
